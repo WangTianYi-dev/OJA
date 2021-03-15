@@ -128,6 +128,8 @@ struct AVLNode* Insert(struct AVLNode* T, int x)
     return T;
 }
 
+AVLNode* Remove(
+
 int main()
 {
     int N;
@@ -139,6 +141,5 @@ int main()
         T = Insert(T, K);
     }
     printf("%d", T->Data);
-    //system("pause");
     return 0;
 }

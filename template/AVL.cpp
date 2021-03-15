@@ -1,12 +1,26 @@
-#include <stdio.h>
-#include <stdlib.h>
+#include <algorithm>
+#include <cstdio>
+#include <cstdlib>
+using namespace std;
 
 struct AVLNode {
     int Data; //节点数据
     struct AVLNode* Left; //指向左子树
     struct AVLNode* Right; //指向右子树
     int Height; //树高
+    AVLNode(int v)
+        : Data(v)
+        , Left(nullptr)
+        , Right(nullptr)
+        , Height(0) {};
+    AVLNode()
+        : Data(0)
+        , Left(nullptr)
+        , Right(nullptr)
+        , Height(0) {};
 };
+
+AVLNode* root;
 
 int Max(int a, int b)
 {
@@ -128,17 +142,33 @@ struct AVLNode* Insert(struct AVLNode* T, int x)
     return T;
 }
 
+// get successor of n in BST. par: parent of successor
+AVLNode* succ(AVLNode* n, AVLNode*& par)
+{
+    if (!n->Right) {
+        par = n;
+        return n->Left;
+    } else {
+        par = n;
+        AVLNode* p = n->Right;
+        while (p->Left) {
+            par = p;
+            p = p->Left;
+        }
+        return p;
+    }
+}
+
 int main()
 {
     int N;
     int K;
-    struct AVLNode* T = NULL;
+    root = NULL;
     scanf("%d", &N);
     for (int i = 0; i < N; i++) {
         scanf("%d", &K);
-        T = Insert(T, K);
+        root = Insert(root, K);
     }
-    printf("%d", T->Data);
-    //system("pause");
+    printf("%d", root->Data);
     return 0;
 }
