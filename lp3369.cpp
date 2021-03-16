@@ -10,6 +10,7 @@ using namespace std;
 #define RIGHT 1
 #define OTHER_SIDE(x) (x ^ 1)
 
+void printtree();
 const int maxn = 1000010;
 struct node {
     int val;
@@ -47,15 +48,21 @@ void Update(int i)
     tree[i].subsize = size;
 }
 
+// rotate right
 int zig(int i)
 {
     int f = tree[i].father, ls = tree[i].son[LEFT];
+    int rgs;
+    if ((rgs = tree[ls].son[RIGHT])) {
+        tree[rgs].father = i;
+    }
     if (f) {
-        if (tree[f].son[LEFT] == f) {
-            tree[f].son[LEFT] = tree[i].son[LEFT];
+        if (tree[f].son[LEFT] == i) {
+            tree[f].son[LEFT] = ls;
         } else {
-            tree[f].son[RIGHT] = tree[i].son[LEFT];
+            tree[f].son[RIGHT] = ls;
         }
+        tree[ls].father = f;
         tree[i].father = ls;
         tree[i].son[LEFT] = tree[ls].son[RIGHT];
         tree[ls].son[RIGHT] = i;
@@ -65,33 +72,42 @@ int zig(int i)
         tree[i].father = ls;
         tree[i].son[LEFT] = tree[ls].son[RIGHT];
         tree[ls].son[RIGHT] = i;
+        tree[ls].father = 0;
     }
+
+    // puts("zig:");
+    // printtree();
     return ls;
 }
 
+// rotate left
 int zag(int i)
 {
-    // node& ni = tree[i];
     int f = tree[i].father, rs = tree[i].son[RIGHT];
+    int lgs;
+    if ((lgs = tree[rs].son[LEFT])) {
+        tree[lgs].father = i;
+    }
     if (f) {
-        // node& nf = tree[tree[i].father];
-        if (tree[f].son[LEFT] == f) {
-            tree[f].son[LEFT] = tree[i].son[LEFT];
+        if (tree[f].son[LEFT] == i) {
+            tree[f].son[LEFT] = rs;
         } else {
-            tree[f].son[RIGHT] = tree[i].son[LEFT];
+            tree[f].son[RIGHT] = rs;
         }
         tree[i].father = rs;
         tree[i].son[RIGHT] = tree[rs].son[LEFT];
         tree[rs].son[LEFT] = i;
         tree[rs].father = f;
     } else {
-        // i is root
         root = rs;
         tree[i].father = rs;
         tree[i].son[RIGHT] = tree[rs].son[LEFT];
         tree[rs].son[LEFT] = i;
         tree[rs].father = 0;
     }
+
+    // puts("zag:");
+    // printtree();
     return rs;
 }
 
@@ -135,6 +151,7 @@ void Rotate(int i)
 }
 
 // splay in splay tree
+void printtree();
 void Splay(int i)
 {
     /*
@@ -146,6 +163,7 @@ void Splay(int i)
     while (f) {
         Rotate(i);
         f = tree[i].father;
+        // printtree();
     }
     root = i;
 }
@@ -183,10 +201,11 @@ void Insert(int x)
             tree[sum].subsize = tree[sum].count = 1;
             tree[sum].val = x;
             tree[f].son[curval < x] = sum;
-
             // different from AVL, there is no need to update predecessors
             // because tree[sum] will be the new root;
             Update(f);
+            // printf("JUST INSERTED:\n");
+            // printtree();
             Splay(sum);
             break;
         }
@@ -201,17 +220,15 @@ int FindNumByRank(int r)
         node& cn = tree[cur];
         // if current node's leftson exists and rank < current node's subsize
         // it means that target is in left subtree
-        if (cn.son[LEFT] && r <= cn.subsize) {
+        int beforeRank = (cn.son[LEFT] ? tree[cn.son[LEFT]].subsize : 0);
+        int nextRank = beforeRank + cn.count;
+        if (r <= beforeRank) {
             cur = cn.son[LEFT];
+        } else if (r <= nextRank) {
+            return cn.val;
         } else {
-            // whether target is current node
-            int s = (cn.son[LEFT] ? tree[cn.son[LEFT]].subsize : 0) + cn.count;
-            if (r <= s) {
-                return cn.val;
-            }
-            // if target is in right subtree
-            r -= s;
             cur = cn.son[RIGHT];
+            r -= nextRank;
         }
     }
     return 0;
@@ -252,9 +269,9 @@ int FindPredessor()
 
 int FindSuccessor()
 {
-    int cur = tree[root].son[LEFT];
-    while (tree[cur].son[RIGHT]) {
-        cur = tree[cur].son[RIGHT];
+    int cur = tree[root].son[RIGHT];
+    while (tree[cur].son[LEFT]) {
+        cur = tree[cur].son[LEFT];
     }
     return cur;
 }
@@ -304,9 +321,9 @@ char info[1000];
 char* getinfo(int i)
 {
     node& n = tree[i];
-    sprintf(info, "index: %d, value: %d, left: %d, right: %d, father: %d, count:"
+    sprintf(info, "value: %d, left: %d, right: %d, father: %d, count:"
                   "%d, subsize: %d",
-        i, n.val, n.son[LEFT], n.son[RIGHT], n.father, n.count,
+        n.val, tree[n.son[LEFT]].val, tree[n.son[RIGHT]].val, tree[n.father].val, n.count,
         n.subsize);
     return info;
 }
@@ -357,12 +374,14 @@ int main()
             break;
         case 6:
             Insert(be_dealt);
+            // printtree();
             printf("%d\n", tree[FindSuccessor()].val);
             DeleteVal(be_dealt);
             break;
         }
         // #ifdef DEBUG
-        printtree();
+        // puts("DONE:");
+        // printtree();
         // #endif
     }
     return 0;
