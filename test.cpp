@@ -1,144 +1,59 @@
-#include <stdio.h>
-#include <stdlib.h>
+// luogu-judger-enable-o2
+// luogu-judger-enable-o2
+#include <algorithm>
+#include <cmath>
+#include <cstdio>
+#include <cstring>
+#define ls(x) T[x].ch[0]
+#define rs(x) T[x].ch[1]
+#define fa(x) T[x].fa
+#define root T[0].ch[1]
+using namespace std;
+const int MAXN = 1e5 + 10, mod = 10007, INF = 1e9 + 10;
 
-struct AVLNode {
-    int Data; //节点数据
-    struct AVLNode* Left; //指向左子树
-    struct AVLNode* Right; //指向右子树
-    int Height; //树高
-};
-
-int Max(int a, int b)
+inline char nc()
 {
-    return a > b ? a : b;
+    static char buf[MAXN], *p1 = buf, *p2 = buf;
+    return p1 == p2 && (p2 = (p1 = buf) + fread(buf, 1, MAXN, stdin)), p1 == p2 ? EOF : *p1++;
 }
 
-//返回树的高度
-int GetH(struct AVLNode* T)
+inline int read()
 {
-    if (T) {
-        return T->Height;
-    } else {
-        return -1;
+    char c = nc();
+    int x = 0, f = 1;
+    while (c < '0' || c > '9') {
+        if (c == '-')
+            f = -1;
+        c = nc();
     }
-}
-
-//右单旋 RR
-struct AVLNode* RR(struct AVLNode* A)
-{
-    struct AVLNode* B; //旋转后的根节点
-    B = A->Right;
-    A->Right = B->Left;
-    B->Left = A;
-    //更新树的高度
-    A->Height = Max(GetH(A->Left), GetH(A->Right)) + 1;
-    B->Height = Max(GetH(B->Left), A->Height) + 1;
-    return B;
-}
-
-struct AVLNode* LL(struct AVLNode* A)
-{
-    struct AVLNode* B;
-    B = A->Left;
-    A->Left = B->Right;
-    B->Right = A;
-    A->Height = Max(GetH(A->Left), GetH(A->Right)) + 1;
-    B->Height = Max(GetH(B->Left), A->Height) + 1;
-    return B;
-}
-
-//LR双旋直接实现
-struct AVLNode* LR(struct AVLNode* A)
-{
-    struct AVLNode *B, *C;
-    B = A->Left;
-    C = B->Right;
-    B->Right = C->Left;
-    A->Left = C->Right;
-    C->Left = B;
-    C->Right = A;
-
-    B->Height = Max(GetH(B->Left), GetH(B->Right)) + 1;
-    A->Height = Max(GetH(A->Left), GetH(A->Right)) + 1;
-    C->Height = Max(B->Height, A->Height) + 1;
-    return C;
-}
-
-//RL双旋直接实现
-struct AVLNode* RL(struct AVLNode* A)
-{
-    struct AVLNode *B, *C;
-    B = A->Right;
-    C = B->Left;
-    B->Left = C->Right;
-    A->Right = C->Left;
-    C->Left = A;
-    C->Right = B;
-
-    B->Height = Max(GetH(B->Left), GetH(B->Right)) + 1;
-    A->Height = Max(GetH(A->Left), GetH(A->Right)) + 1;
-    C->Height = Max(A->Height, B->Height) + 1;
-    return C;
-}
-
-//作用:将x插入AVL树T中，并且返回调整后的AVL树
-struct AVLNode* Insert(struct AVLNode* T, int x)
-{
-    if (!T) {
-        //若插入空树 则新建包含一个节点的树
-        T = (struct AVLNode*)malloc(sizeof(struct AVLNode));
-        T->Data = x;
-        T->Left = NULL;
-        T->Right = NULL;
-        T->Height = 0;
-    } else if (x < T->Data) {
-        //插入T的左子树
-        T->Left = Insert(T->Left, x);
-
-        //如果需要左旋
-        if (GetH(T->Left) - GetH(T->Right) == 2) {
-            if (x < T->Left->Data) {
-                //左单旋
-                T = LL(T);
-            } else {
-                //左右双旋
-                T = LR(T);
-            }
-        }
-    } else if (x > T->Data) {
-        //插入T的右子树
-        //插入T的左子树
-        T->Right = Insert(T->Right, x);
-
-        //如果需要左旋
-        if (GetH(T->Left) - GetH(T->Right) == -2) {
-            if (x > T->Right->Data) {
-                //右单旋
-                T = RR(T);
-            } else {
-                //右左双旋
-                T = RL(T);
-            }
-        }
-
-    } //else if 插入右子树结束
-
-    //更新树高
-    T->Height = Max(GetH(T->Left), GetH(T->Right)) + 1;
-    return T;
-}
-
-int main()
-{
-    int N;
-    int K;
-    struct AVLNode* T = NULL;
-    scanf("%d", &N);
-    for (int i = 0; i < N; i++) {
-        scanf("%d", &K);
-        T = Insert(T, K);
+    while (c >= '0' && c <= '9') {
+        x = x * 10 + c - '0';
+        c = nc();
     }
-    printf("%d", T->Data);
-    //system("pause");
-    return 0;
+    return x * f;
+}
+
+struct node {
+    int fa, ch[2], val, rec, sum;
+} T[MAXN];
+
+int tot = 0, pointnum = 0;
+void update(int x) { T[x].sum = T[ls(x)].sum + T[rs(x)].sum + T[x].rec; }
+int ident(int x) { return T[fa(x)].ch[0] == x ? 0 : 1; }
+
+void connect(int x, int fa, int how)
+{
+    T[fa].ch[how] = x;
+    T[x].fa = fa;
+}
+
+void rotate(int x)
+{
+    int Y = fa(x), R = fa(Y);
+    int Yson = ident(x), Rson = ident(Y);
+    connect(T[x].ch[Yson ^ 1], Y, Yson);
+    connect(Y, x, Yson ^ 1);
+    connect(x, R, Rson);
+    update(Y);
+    update(x);
 }
