@@ -64,8 +64,9 @@ public:
 
 int main()
 {
-    Trie* o = new Trie();
-    o->insert("apple");
-    cout << o->search("apple");
-    return 0;
+    // Trie* o = new Trie();
+    // o->insert("apple");
+    // cout << o->search("apple");
+    // memset(
+    // return 0;
 }
