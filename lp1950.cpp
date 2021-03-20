@@ -1,47 +1,50 @@
 #include <iostream>
+#include <algorithm>
 using namespace std;
-const int maxn = 1010;
-int m, n;
-char a[maxn][maxn];
 
-bool valid(int x1, int x2, int y1, int y2)
+
+const int maxn = 1010;
+
+char a[1010][1010] = {};
+int l[maxn] = {};
+
+int n, m;
+
+int cnt()
 {
-    for (int i = x1; i < x2; i++) {
-        for (int j = y1; j < y2; j++) {
-            if (a[i][j] == '*') {
-                return false;
+    int ans = 0;
+    for (int i = 1; i <= n; i++) {
+        for (int j = 1; j <= m; j++) {
+            if (a[i][j] == '.') {
+                l[j]++;
+            } else {
+                l[j] = 0;
+            }
+        }
+        for (int j = 1; j <= m; j++) {
+            int tl = l[j];
+            for (int k = j; k <= m; k++) {
+                if (!l[k]) {
+                    break;
+                }
+                tl = min(tl, l[k]);
+                ans += tl;
             }
         }
     }
-    return true;
+    return ans;
 }
 
 int main()
 {
+    cin.tie(0);
+    cout.tie(0);
     ios::sync_with_stdio(0);
-    cin >> m >> n;
-    for (int i = 1; i <= m; i++) {
-        for (int j = 1; j <= n; j++) {
+    cin >> n >> m;
+    for (int i = 1; i <= n; i++) {
+        for (int j = 1; j <= m; j++) {
             cin >> a[i][j];
         }
     }
-
-    int ans = 0;
-    for (int x1 = 1; x1 <= m; x1++) {
-        for (int x2 = x1 + 1; x2 <= m + 1; x2++) {
-            for (int y1 = 1; y1 <= n; y1++) {
-                for (int y2 = y1 + 1; y2 <= n + 1; y2++) {
-                    if (valid(x1, x2, y1, y2)) {
-                        ans++;
-                    } else {
-                        y1 =  y2;
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-    cout << ans << endl;
-    return 0;
+    cout << cnt() << '\n';
 }
