@@ -1,61 +1,30 @@
-#include "leetcode.h"
+#include <bits/stdc++.h>
+using namespace std;
+
 class Solution {
 public:
-    int largestRectangleArea(vector<int>& heights)
-    {
-        stack<int> s1;
-        int l = heights.size();
-        vector<int> left(l), right(l);
-        for (int i = 0; i < l; i++) {
-            for (;;) {
-                if (s1.empty()) {
-                    s1.push(i);
-                    left[i] = -1;
-                    break;
-                } else {
-                    if (heights[i] <= heights[s1.top()]) {
-                        s1.pop();
-                    } else {
-                        left[i] = s1.top();
-                        s1.push(i);
-                        break;
-                    }
-                }
+    int largestRectangleArea(vector<int>& heights) {
+        int n = heights.size();
+        vector<int> left(n), right(n, n);
+        
+        stack<int> mono_stack;
+        for (int i = 0; i < n; ++i) {
+            while (!mono_stack.empty() && heights[mono_stack.top()] >= heights[i]) {
+                right[mono_stack.top()] = i;
+                mono_stack.pop();
             }
+            left[i] = (mono_stack.empty() ? -1 : mono_stack.top());
+            mono_stack.push(i);
         }
-        s1 = stack<int>();
-        for (int i = l - 1; i >= 0; i--) {
-            for (;;) {
-                if (s1.empty()) {
-                    s1.push(i);
-                    right[i] = l;
-                    break;
-                } else {
-                    if (heights[i] <= heights[s1.top()]) {
-                        s1.pop();
-                    } else {
-                        right[i] = s1.top();
-                        s1.push(i);
-                        break;
-                    }
-                }
-            }
+        int ans = 0;
+        for (int i = 0; i < n; ++i) {
+            ans = max(ans, (right[i] - left[i] - 1) * heights[i]);
         }
-        int Max = 0;
-        // for (int i = 0; i < l; i++) {
-        //     printf("left %d: %d, right %d: %d\n", i, left[i], i, right[i]);
-        // }
-        for (int i = 0; i < l; i++) {
-            // cout << heights[i] * (right[i] - left[i] - 1) << ' ';
-            Max = max(Max, heights[i] * (right[i] - left[i] - 1));
-        }
-        return Max;
+        return ans;
     }
 };
 
-// int main()
-// {
-//     Solution s;
-//     vector<int> v{2, 1, 5, 6, 2, 3};
-//     s.largestRectangleArea(v);
-// }
+// 作者：LeetCode-Solution
+// 链接：https://leetcode-cn.com/problems/largest-rectangle-in-histogram/solution/zhu-zhuang-tu-zhong-zui-da-de-ju-xing-by-leetcode-/
+// 来源：力扣（LeetCode）
+// 著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
