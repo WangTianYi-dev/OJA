@@ -2,39 +2,20 @@
 
 class Solution {
 public:
-    pair<int, int> expand(const string& s, int l, int r)
-    {
-        int n = s.size();
-        while (l >= 0 && r < n && s[l] == s[r]) {
-            l--;
-            r++;
+    int expand(const string& s, int left, int right) {
+        while (left >= 0 && right < s.size() && s[left] == s[right]) {
+            --left;
+            ++right;
         }
-        return { l + 1, r - 1 };
+        return (right - left - 2) / 2;
     }
-    string longestPalindrome(string s)
-    {
-        int n = s.size();
-        int l = 0, r = 0;
-        for (int i = 0; i < n; i++) {
-            auto [left1, right1] = expand(s, i, i);
-            auto [left2, right2] = expand(s, i, i + 1);
-            if (right1 - left1 > r - l) {
-                r = right1;
-                l = left1;
-            }
-            if (right2 - left2 > r - l) {
-                r = right2;
-                l = left2;
-            }
-        }
-        return s.substr(l, l - r + 1);
+
+    string longestPalindrome(string s) {
+        
     }
 };
 
-int main()
-{
-    Solution s;
-    string str = "babad";
-    cout << s.longestPalindrome(str) << endl;
-    return 0;
-}
+// 作者：LeetCode-Solution
+// 链接：https://leetcode-cn.com/problems/longest-palindromic-substring/solution/zui-chang-hui-wen-zi-chuan-by-leetcode-solution/
+// 来源：力扣（LeetCode）
+// 著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
