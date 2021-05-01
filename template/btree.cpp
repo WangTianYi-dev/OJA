@@ -1,3 +1,5 @@
+#include <algorithm>
+#include <assert.h>
 #include <iostream>
 #include <vector>
 // template <class T> using SortedVec = std::vector<T>;
@@ -5,6 +7,8 @@
 
 template <class T> class SortedVec : public std::vector<T> {
   public:
+    T &back() { return (*this)[this->size() - 1]; }
+
     int search(T &e) {
         int lo = 0, hi = this->size() - 1, mi = 0;
         while (lo < hi) {
@@ -20,11 +24,8 @@ template <class T> class SortedVec : public std::vector<T> {
     void insert(int p, T &e) { this->insert(this->begin() + p, e); }
 
     // [lo, hi)
-    SortedVec<T> sub(int lo, int hi) {
-        SortedVec<T> sv;
-        for (int i = lo; i < hi; i++) {
-            sv.push_back((*this)[i]);
-        }
+    SortedVec<T> slice(int lo, int hi) {
+        SortedVec<T> sv(this->begin() + lo, this->begin() + hi);
         return sv;
     }
 
@@ -34,6 +35,8 @@ template <class T> class SortedVec : public std::vector<T> {
             this->push_back(sv[i]);
         }
     }
+
+    T remove(int r) { return remove(this->begin() + r); }
 };
 
 template <class T> struct BTNode;
@@ -47,6 +50,7 @@ template <class T> struct BTNode {
         parent = nullptr;
         child.push_back(nullptr);
     }
+
     BTNode(T e, p<T> lc = nullptr, p<T> rc = nullptr) {
         parent = nullptr;
         key.push_back(e);
@@ -86,18 +90,28 @@ template <class T> class BTree {
             v->parent = pr;
         }
         p<T> u = new BTNode<T>();
-        u->child = v->child.sub(s + 1, v->child.size());
-        // u->child += v->child.sub(order - s, v->child.size());
-        u->key = u->key.sub(s + 1, u->key.size());
-        
+        u->child += v->child.slice(s + 1, v->child.size());
+        // u->child += v->child.slice(order - s, v->child.size());
+        u->key += u->key.slice(s + 1, u->key.size());
+
         if (u->child[0]) {
             for (int i = 0, l = u->child.size(); i < l; i++) {
                 u->child[i]->parent = u;
             }
         }
+        u->parent = pr;
+        int r = 1 + pr->key.search(v->key[s]);
+        pr->key.insert(r, v->key[s]);
+        pr->child.insert(r + 1, u);
+        v->key.pop_back();
+        solveOverflow(pr);
+    }
+
+    void solveUnderflow(p<T> v) {
+        if ((order + 1) / 2 <= v->child.size()) return;
+        p<T> pr = v->parent;
         
     }
-    void solveUnderflow(p<T>);
 
     BTree(int order = 3) : order(order), size(0) { root = new p<T>(); };
     ~BTree() {
@@ -132,5 +146,23 @@ template <class T> class BTree {
         return true;
     }
 
-    bool remove(const T &) {}
+    bool remove(const T &e) {
+        p<T> v = search(e);
+        if (!v)
+            return false;
+        int r = v->key.search(e);
+        if (v->child[0]) {
+            p<T> u = v->child[r + 1];
+            while (u->child[0])
+                u = u->child[0];
+            v->key[r] = u->key[0];
+            v = u;
+            r = 0;
+        }
+        v->key.remove(r);
+        v->child.remove(r + 1);
+        size--;
+        solveUnderflow(v);
+        return true;
+    }
 };

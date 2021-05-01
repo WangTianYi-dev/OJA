@@ -149,5 +149,6 @@ template <class T> struct RedBlackTree {
             }
         }
     }
+    
     void solveDoubleBlack(node<T> *x);
 };
