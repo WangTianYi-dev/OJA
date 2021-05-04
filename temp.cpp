@@ -1,23 +1,32 @@
-#include <ctime>
 #include <iostream>
 using namespace std;
+#include "template/BitMap.h"
+BitMap bm(3);
+void printb(char t) {
+    for (int i = 0; i < 8; i++) {
+        char m = 1 << i;
+        if (t & m) {
+            cout << 1;
+        } else {
+            cout << 0;
+        }
+    }
+    cout << ' ';
+}
 
-int a[10000000], b[sizeof(a)/sizeof(int)];
 int main() {
-    clock_t s = clock(), e;
-    s = clock();
-    memset(a, 0, sizeof(a));
-    e = clock();
-    cout << e - s << endl;
-    s = clock();
-    memcpy(a, b, sizeof(a));
-    e = clock();
-    cout << e - s << endl;
-    // s = clock();
-    // for (int i = 0; i < sizeof(a) / sizeof(int); i += 2) {
-    //     a[i] = 2;
-    // }
-    // e = clock();
-    // cout << e - s << endl;
-    return 0;
+    int i, j;
+    while (1) {
+        cout << "set:" << endl;
+        cin >> i;
+        if (i >= 0)
+            bm.set(i);
+        for (int i = 0; i < bm.gsize; i++) {
+            printb(bm.map[i]);
+        }
+        cout << endl;
+        cout << "get:" << endl;
+        cin >> j;
+        cout << bm.get(j) << endl;
+    }
 }
