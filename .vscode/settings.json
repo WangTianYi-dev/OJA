@@ -87,7 +87,9 @@
         "valarray": "cpp",
         "stdio.h": "c",
         "__memory": "cpp",
-        "filesystem": "cpp"
+        "filesystem": "cpp",
+        "__cxx_version": "cpp",
+        "memory_resource": "cpp"
     },
     "git.ignoreLimitWarning": true
 }
