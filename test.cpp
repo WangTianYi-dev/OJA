@@ -1,21 +1,15 @@
+#include <unordered_map>
 #include <iostream>
-#include <ctime>
 using namespace std;
-
-int main() {
-    long a = 1;
-    auto b = clock();
-    for (long i = 0; i < ((long)1 << 30); i++) {
-        a <<= 1;
+int main()
+{
+    unordered_map<int, int> m;
+    int a[] {1,23,4,5,67,8,2,3,5,4,543,2};
+    for (auto i : a) {
+        m[i]++;
     }
-    auto e = clock();
-    cout << a << ' ' << e - b << endl;
-    a = 1;
-    b = clock();
-    for (long i = 0; i < ((long)1 << 30); i++) {
-        a *= 2;
+    for (auto i : a) {
+        cout << m[i] << endl;
     }
-    e = clock();
-    cout << a << ' ' << e - b << endl;
     return 0;
 }

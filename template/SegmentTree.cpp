@@ -1,74 +1,81 @@
-#include <bits/stdc++.h>
+// luogu p4475
+#include <iostream>
 using namespace std;
 
-const int maxn = 10007;
+typedef long long ll;
 
-int Sum[maxn << 2], Add[maxn << 2];
-int A[maxn], n;
+const int maxn = 1e5 + 7;
+ll n, m;
+ll a[maxn], sum[maxn << 2], add[maxn << 2];
 
-// refresh sum
-void PushUp(int cur) { Sum[cur] = Sum[cur << 1] + Sum[cur << 1 | 1]; }
-
-void Build(int l, int r, int cur) { // [l, r]
+void build(ll l, ll r, ll p) {
     if (l == r) {
-        Sum[cur] = A[l];
+        sum[p] = a[l];
         return;
     }
-    int m = (l + r) >> 1;
-    Build(l, m, cur << 1);
-    Build(m + 1, cur, cur << 1 | 1);
-    PushUp(cur);
+    ll m = (l + r) >> 1;
+    build(l, m, p << 1), build(m + 1, r, p << 1 | 1);
+    sum[p] = sum[p << 1 | 1] + sum[p << 1];
 }
 
-// A[L] += C
-void UpdatePoint(int L, int C, int l, int r, int cur) {
-    if (l == r) {
-        Sum[cur] += C;
+void update(ll l, ll r, ll c, ll s, ll t, ll p) {
+    if (l <= s && t <= r) {
+        sum[p] += (t - s + 1) * c;
+        add[p] += c;
         return;
     }
-    int m = (r + l) >> 1;
-    if (L <= m) {
-        UpdatePoint(L, C, l, m, cur << 1);
-    } else {
-        UpdatePoint(L, C, m + 1, r, cur << 1 | 1);
+    ll m = (s + t) >> 1;
+    if (add[p]) {
+        sum[p << 1] += add[p] * (m - s + 1);
+        sum[p << 1 | 1] += add[p] * (t - m);
+        add[p << 1] += add[p];
+        add[p << 1 | 1] += add[p];
+        add[p] = 0;
     }
+    if (l <= m) {
+        update(l, r, c, s, m, p << 1);
+    }
+    if (m < r) {
+        update(l, r, c, m + 1, t, p << 1 | 1);
+    }
+    sum[p] = sum[p << 1] + sum[p << 1 | 1];
 }
 
-void PushDown(int cur, int nl, int nr) {
-    Add[cur << 1] += Add[cur];
-    Add[cur << 1 | 1] += Add[cur];
-    Sum[cur << 1] += Add[cur] * nl;
-    Sum[cur << 1 | 1] += Add[cur] * nr;
-    Add[cur] = 0;
-}
-
-void UpdateRange(int L, int R, int C, int l, int r, int cur) {
-    if (L <= l && r <= R) {
-        Sum[cur] += C * (r - l + 1);
-        Add[cur] += C;
-        return;
+ll query(ll l, ll r, ll s, ll t, ll p) {
+    if (l <= s && t <= r) {
+        return sum[p];
     }
-    int m = (r + l) << 1;
-    PushDown(cur, m - l + 1, r - m);
-    if (L <= m) {
-        UpdateRange(L, R, C, l, m, cur << 1);
+    ll m = (s + t) >> 1;
+    if (add[p]) {
+        sum[p << 1] += add[p] * (m - s + 1);
+        sum[p << 1 | 1] += add[p] * (t - m);
+        add[p << 1] += add[p];
+        add[p << 1 | 1] += add[p];
+        add[p] = 0;
     }
-    if (R > m) {
-        UpdateRange(L, R, C, m + 1, r, cur << 1 | 1);
+    ll ans = 0;
+    if (l <= m) {
+        ans += query(l, r, s, m, p << 1);
     }
-    PushUp(cur);
-}
-
-int Query(int L, int R, int l, int r, int cur) {
-    if (L <= l && r <= R) {
-        return Sum[cur];
+    if (m < r) {
+        ans += query(l, r, m + 1, t, p << 1 | 1);
     }
-    int m = (r + l) >> 1;
-    PushDown(cur, m - l + 1, r - m);
-    int ans = 0;
-    if (L <= m)
-        ans += Query(L, R, l, r, cur << 1);
-    if (R > m)
-        ans += Query(L, R, m + 1, r, cur << 1 | 1);
     return ans;
+}
+
+int main() {
+    std::ios::sync_with_stdio(0);
+    ll q, i1, i2, i3, i4;
+    std::cin >> n >> q;
+    for (ll i = 1; i <= n; i++)
+        std::cin >> a[i];
+    build(1, n, 1);
+    while (q--) {
+        std::cin >> i1 >> i2 >> i3;
+        if (i1 == 2)
+            std::cout << query(i2, i3, 1, n, 1) << '\n';
+        else
+            std::cin >> i4, update(i2, i3, i4, 1, n, 1);
+    }
+    return 0;
 }

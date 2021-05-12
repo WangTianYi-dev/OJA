@@ -1,7 +1,9 @@
 #include <iostream>
 #include <stdlib.h>
 #include <time.h>
+#include <algorithm>
 using namespace std;
+
 template <class T>
 struct QuickSelect {
     QuickSelect()
