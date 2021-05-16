@@ -1,26 +1,22 @@
+#include <cctype>
 #include <cstdio>
 #include <queue>
-#include <utility>
-#include <vector>
 using namespace std;
-int a[100005] = {}, b[100005] = {}, to[100005] = {}, i, n;
-priority_queue <pair<int, int>, vector<pair<int, int>>, greater<pair<int, int> > > q;
+
+int n, a[100001], b[100001];
 int main() {
     scanf("%d", &n);
-    for (i = 1; i <= n; i++)
+    for (register int i = 1; i <= n; ++i)
         scanf("%d", &a[i]);
-
-    for (i = 1; i <= n; i++) {
+    for (register int i = 1; i <= n; ++i)
         scanf("%d", &b[i]);
-        to[i] = 1;
-        q.push(pair<int, int>(a[1] + b[i], i));
-    }
-
-    while (n--) {
-        printf("%d ", q.top().first);
-        i = q.top().second;
+    priority_queue<int, vector<int>, greater<int>> q;
+    for (register int i = 1; i <= n; ++i)
+        for (register int j = 1; (i - 1) * (j - 1) <= n && j <= n; ++j)
+            q.push(a[i] + b[j]);
+    for (register int i = 0; i < n; ++i) {
+        printf("%d ", q.top());
         q.pop();
-        q.push(pair<int, int>(a[++to[i]] + b[i], i));
     }
     return 0;
 }
