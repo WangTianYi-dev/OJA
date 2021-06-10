@@ -1,7 +1,7 @@
 #include "leetcode.h"
 
 class Solution {
-public:
+  public:
     int lastStoneWeightII(vector<int> &stones) {
         int sum = accumulate(stones.begin(), stones.end(), 0);
         int n = stones.size(), m = sum / 2;
