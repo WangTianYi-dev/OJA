@@ -1,24 +1,19 @@
-#include "leetcode.h"
+#include <bits/stdc++.h>
+using namespace std;
+
 class Solution {
   public:
-    string largestNumber(vector<int> &cost, int target) {
-        vector<int> lens(target + 1, INT_MIN);
-        lens[0] = 0;
-        for (auto c : cost) {
-            for (int j = c; j <= target; j++) {
-                lens[j] = max(lens[j], lens[j - c] + 1);
+    bool stoneGame(vector<int> &piles) {
+        int length = piles.size();
+        auto dp = vector<vector<int>>(length, vector<int>(length));
+        for (int i = 0; i < length; i++) {
+            dp[i][i] = piles[i];
+        }
+        for (int i = length - 2; i >= 0; i--) {
+            for (int j = i + 1; j < length; j++) {
+                dp[i][j] = max(piles[i] - dp[i + 1][j], piles[j] - dp[i][j - 1]);
             }
         }
-        if (lens[target] < 0) {
-            return "0";
-        }
-        string res;
-        for (int i = 9, j = target; i >= 1; i--) {
-            // lens[j - c] + 1 == lens[j] means success
-            for (int c = cost[i - 1]; j >= c && lens[j - c] + 1 == lens[j]; j -= c) {
-                res += '0' + i;
-            }
-        }
-        return res;
+        return dp[0][length - 1] > 0;
     }
 };
